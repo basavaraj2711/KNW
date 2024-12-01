@@ -11,7 +11,7 @@ from pyvis.network import Network
 genai.configure(api_key="AIzaSyCtwToVA60UQpJpa1BrHHGxxoxcoSNBBbM")
 
 # Neo4j Configuration
-NEO4J_URI = "bolt://localhost:7687"
+NEO4J_URI = "http://localhost:7474"
 NEO4J_USERNAME = "neo4j"
 NEO4J_PASSWORD = "password"
 
