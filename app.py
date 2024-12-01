@@ -70,15 +70,23 @@ st.markdown(
 
 # Sidebar for navigation
 st.sidebar.header("📂 File Operations")
-file_path = st.sidebar.text_input("Dataset Path", r"C:\Users\Hp\OneDrive\Desktop\knw\data\countries_dataset.csv")
+
+# Add file uploader to replace hardcoded file paths
+uploaded_file = st.sidebar.file_uploader(
+    "Upload Dataset (CSV format only)", type=["csv"]
+)
 
 # Load Dataset
-try:
-    data = pd.read_csv(file_path)
-    st.subheader("📊 Dataset Preview")
-    st.dataframe(data.head(), use_container_width=True)
-except Exception as e:
-    st.sidebar.error(f"Error loading dataset: {e}")
+if uploaded_file:
+    try:
+        data = pd.read_csv(uploaded_file)
+        st.subheader("📊 Dataset Preview")
+        st.dataframe(data.head(), use_container_width=True)
+    except Exception as e:
+        st.sidebar.error(f"Error loading dataset: {e}")
+        st.stop()
+else:
+    st.sidebar.info("Please upload a dataset to proceed.")
     st.stop()
 
 # Schema Inference
