@@ -6,18 +6,28 @@ from src.graph_population import create_knowledge_graph
 from neo4j import GraphDatabase
 import networkx as nx
 from pyvis.network import Network
+import os
 
 # Set your Gemini API key
-genai.configure(api_key="AIzaSyCtwToVA60UQpJpa1BrHHGxxoxcoSNBBbM")
+genai.configure(api_key=os.getenv("GEMINI_API_KEY", "AIzaSyCtwToVA60UQpJpa1BrHHGxxoxcoSNBBbM"))
 
 # Neo4j Configuration
-NEO4J_URI = "http://localhost:7474"
-NEO4J_USERNAME = "neo4j"
-NEO4J_PASSWORD = "password"
+NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME", "neo4j")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
 
 # Function to get the Neo4j driver
 def get_driver():
-    return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+    """
+    Returns a Neo4j driver instance.
+    Ensures the connection uses environment-specific settings.
+    """
+    try:
+        driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+        return driver
+    except Exception as e:
+        st.error(f"Error connecting to Neo4j: {e}")
+        st.stop()
 
 # Connect to Neo4j
 driver = get_driver()
@@ -117,14 +127,8 @@ predefined_queries = [
     "MATCH (c:Country)-[:HAS_CURRENCY]->(currency:Currency) RETURN c.name, currency.code LIMIT 10",
     "MATCH (c:Country)-[:LARGEST_CITY_IN]->(city:City) RETURN c.name, city.name LIMIT 10",
     "MATCH (c:Country)-[:SPEAKS]->(lang:Language) RETURN c.name, lang.name LIMIT 10",
-    "MATCH (c:Country)-[:LOCATED_AT]->(city:City) RETURN c.name, city.name LIMIT 10",
     "MATCH (city:City)-[r]->(c:Country) RETURN city.name, type(r), c.name LIMIT 10",
-    "MATCH (c:Country)-[:HAS_CURRENCY]->(currency:Currency) WHERE currency.code = 'USD' RETURN c.name",
-    "MATCH (lang:Language)<-[:SPEAKS]-(c:Country) RETURN lang.name, c.name LIMIT 10",
-    "MATCH p=(city:City)-[r]->() RETURN p LIMIT 25",
-    "MATCH (c:Country)-[:LARGEST_CITY_IN]->(city:City) WHERE city.population > 1000000 RETURN c.name, city.name",
-    "MATCH (c:Country)-[:LOCATED_AT]->(city:City) RETURN c.name, city.latitude, city.longitude LIMIT 10",
-    "MATCH (currency:Currency)<-[:HAS_CURRENCY]-(c:Country) RETURN currency.code, c.name LIMIT 10"
+    "MATCH p=(city:City)-[r]->() RETURN p LIMIT 25"
 ]
 
 # Sidebar for Query Selection
